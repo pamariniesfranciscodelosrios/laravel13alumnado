@@ -1,13 +1,341 @@
-# DESCARGA REPOSITORIO
+# 1 DESCARGA y copia de un REPOSITORIO con un proyecto Laravel creado
+
+# Práctica guiada · Instalación y configuración del proyecto Laravel 13
+
+Objetivo: descargar un proyecto Laravel 13 desde GitHub, instalar sus dependencias, configurar MySQL, crear la base de datos, generar la clave de aplicación y ejecutar las migraciones y seeders para mostrar el listado de 11 alumnos del IES Francisco de los Ríos.
+
+!!! alert "Cuidado con repositorio"
+
+**	Evita clonar este repositorio dentro de tu repositorio para evitar posibles errores**
+
+Repositorio de partida
+
+[pamariniesfranciscodelosrios/laravel13alumnado](https://github.com/pamariniesfranciscodelosrios/laravel13alumnado?utm_source=chatgpt.com)
+
+El repositorio contiene el proyecto Laravel y el archivo `.env.example` que utilizaremos para configurar la instalación local.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://github.com\&sz=32)
+
+GitHub
+
+## 1. Comprobar los requisitos previos
+
+Antes de comenzar debemos tener instalados y configurados:
+
+- PHP 8.3 o superior, con la extensión `pdo_mysql` habilitada.
+- Composer, para instalar las dependencias de Laravel.
+- MySQL Server, con el servicio iniciado.
+- Git, para descargar el repositorio.
+- Visual Studio Code u otro editor.
+
+Abrimos una terminal y comprobamos:
+
+```
+php -v
+composer --version
+git --version
+```
+
+Si alguno de estos comandos no funciona, debemos revisar la instalación y la variable de entorno `PATH`.
+
+## 2. Descargar el proyecto desde GitHub
+
+Abrimos una terminal en la carpeta donde guardaremos nuestros proyectos y ejecutamos:
+
+```
+git clone https://github.com/pamariniesfranciscodelosrios/laravel13alumnado.git
+```
 
 
 
+![1792507461796](image/README/1792507461796.png)
+
+Fijaros cómo todavía falta VENDOR
+
+![1792507500154](image/README/1792507500154.png)
+
+
+Entramos en la carpeta descargada:
+
+```
+cd laravel13alumnado
+```
+
+Abrimos el proyecto en Visual Studio Code:
+
+```
+code .
+```
+
+## 3. Instalar las dependencias
+
+El repositorio contiene el archivo `composer.json`, donde se definen las dependencias PHP que necesita la aplicación.
+
+Ejecutamos:
+
+```
+composer install
+```
+
+Composer instalará las dependencias en la carpeta `vendor`.
+
+![1792507538357](image/README/1792507538357.png)
+
+Importante: no utilizamos `composer create-project`, porque el proyecto ya está creado y lo hemos descargado desde GitHub.
+
+## 4. Crear y configurar el archivo .env
+
+> Vemos cómo **NO** se descarga el archivo **.env**
+
+![1792507577639](image/README/1792507577639.png)
+
+Laravel utiliza el archivo `.env` para guardar la configuración específica de cada equipo, incluida la conexión con MySQL.
+
+En la carpeta principal encontraremos `.env.example`. Creamos una copia y la llamamos `.env`.
+
+En Windows (PowerShell):
+
+```
+Copy-Item .env.example .env
+```
+
+En Linux o macOS:
+
+```
+cp .env.example .env
+```
+
+Editamos las siguientes variables del archivo `.env`:
+
+```
+APP_NAME="IES Francisco de los Rios"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=daw_laravel
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+| Variable          | Significado                                      |
+| ----------------- | ------------------------------------------------ |
+| `APP_NAME`      | Nombre de la aplicación                         |
+| `APP_ENV`       | Entorno de ejecución: local                     |
+| `APP_DEBUG`     | Mostrar errores detallados durante el desarrollo |
+| `APP_URL`       | Dirección local de la aplicación               |
+| `DB_CONNECTION` | Motor de base de datos utilizado                 |
+| `DB_HOST`       | Dirección del servidor MySQL                    |
+| `DB_PORT`       | Puerto del servicio MySQL                        |
+| `DB_DATABASE`   | Nombre de la base de datos                       |
+| `DB_USERNAME`   | Usuario de MySQL                                 |
+| `DB_PASSWORD`   | Contraseña del usuario                          |
+
+Atención: si el usuario `root` de MySQL tiene contraseña, debemos escribirla en `DB_PASSWORD`. No se debe subir el archivo `.env` a GitHub.
+
+Las demás variables del archivo pueden mantenerse con sus valores predeterminados para esta práctica.
+
+## 5. Crear la base de datos MySQL
+
+Comprobamos que el servidor MySQL está iniciado.
+
+Podemos utilizar MySQL Workbench, phpMyAdmin o el cliente de terminal.
+
+Entramos en MySQL, por ejemplo:
+
+```
+mysql -u root -p
+```
+
+Introducimos la contraseña cuando se solicite y ejecutamos:
+
+```
+CREATE DATABASE daw_laravel
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+```
+
+Comprobamos que se ha creado:
+
+```
+SHOW DATABASES;
+```
+
+La base de datos `daw_laravel` aparecerá en el listado. Todavía no contendrá las tablas del proyecto.
+
+![1792507766975](image/README/1792507766975.png)
+
+
+![1792507784109](image/README/1792507784109.png)
+
+
+## 6. Generar la clave de Laravel
+
+Vemos cómo todavía nuestra app no tiene clave en .env:
+
+![1792507843718](image/README/1792507843718.png)
+
+
+Volvemos a la terminal del proyecto y ejecutamos:
+
+```
+php artisan key:generate
+```
+
+Este comando genera la clave de aplicación y la guarda en la variable `APP_KEY` del archivo `.env`.
+
+![1792507869182](image/README/1792507869182.png)
+
+Ejemplo del formato que tendrá:
+
+```
+APP_KEY=base64:...
+```
+
+La clave real será generada automáticamente y no debemos inventarla ni copiar la de otro compañero.
+
+## 7. Ejecutar las migraciones
+
+Las migraciones permiten crear la estructura de las tablas de MySQL mediante código PHP.
+
+Ejecutamos:
+
+```
+php artisan config:clear
+php artisan migrate
+```
+
+Laravel creará las tablas definidas en las migraciones, incluida `alumnos`.
+
+NOS DA UN ERROR, y le decimos que no, ¿qué está haciendo?
+
+![1792507988861](image/README/1792507988861.png)
+
+Es porque no hemos configurado nuestro MYSQL y va a hacerlo con SQLITE
+
+
+Editamos el archivo `.env` del proyecto:
+
+- importante señalar el nombre de la base de datos
+
+```
+daw_laravel
+```
+
+
+```
+APP_NAME="IES Francisco de los Ríos"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=daw_laravel
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+El usuario y la contraseña deben adaptarse a la instalación local de MySQL.
+
+![1792508148742](image/README/1792508148742.png)
+
+
+Podemos comprobarlo en MySQL:
+
+```
+USE daw_laravel;
+
+SHOW TABLES;
+
+DESCRIBE alumnos;
+```
+
+## 8. Insertar los 11 alumnos con seeders
+
+Los seeders permiten introducir datos de prueba en la base de datos.
+
+Ejecutamos:
+
+```
+php artisan db:seed
+```
+
+El seeder del proyecto insertará los 11 alumnos ficticios.
+
+![1792508192962](image/README/1792508192962.png)
+
+Comprobamos los registros desde MySQL:
+
+```
+SELECT * FROM alumnos;
+```
+
+Si todo es correcto, la consulta devolverá 11 filas.
+
+## 9. Ejecutar la aplicación Laravel
+
+Iniciamos el servidor de desarrollo:
+
+```
+php artisan serve
+```
+
+Abrimos el navegador en:
+
+Listado de alumnos
+
+[http://127.0.0.1:8000/alumnos](http://127.0.0.1:8000/alumnos?utm_source=chatgpt.com)
+
+&#x20;Copiar dirección
+
+La página deberá mostrar el título IES FRANCISCO DE LOS RÍOS, una tabla con los nombres y apellidos de los 11 alumnos y el número total de registros.
+
+## 10. Comprobación final de la práctica
+
+Lista de verificación
+
+* [ ] He clonado el repositorio desde GitHub.
+* [ ] He ejecutado composer install correctamente.
+* [ ] He creado y configurado el archivo .env.
+* [ ] He creado la base de datos daw_laravel en MySQL.
+* [ ] He generado APP_KEY con Artisan.
+* [ ] He ejecutado las migraciones sin errores.
+* [ ] He insertado los 11 alumnos mediante el seeder.
+* [ ] Puedo visualizar el listado en el navegador.
+
+## 11. Errores habituales
+
+| Error                              | Posible solución                         |
+| ---------------------------------- | ----------------------------------------- |
+| `vendor/autoload.php not found`  | Ejecutar `composer install`             |
+| `No application encryption key`  | Ejecutar `php artisan key:generate`     |
+| `Access denied for user`         | Revisar `DB_USERNAME` y `DB_PASSWORD` |
+| `Unknown database 'daw_laravel'` | Crear la base de datos en MySQL           |
+| `could not find driver`          | Habilitar la extensión PHP `pdo_mysql` |
+| `Connection refused`             | Iniciar MySQL y revisar el puerto         |
+| `Table 'alumnos' doesn't exist`  | Ejecutar `php artisan migrate`          |
+| No aparecen alumnos                | Ejecutar `php artisan db:seed`          |
+
+## 12. Actividad final 
+
+Una vez que la aplicación funcione correctamente, cada alumno deberá realizar estas tres tareas:
+
+1. Cambiar el nombre del centro en la vista Blade para comprobar qué archivo genera el HTML.
+2. Modificar el seeder, sustituyendo uno de los nombres ficticios por su propio nombre, y reconstruir los datos de prueba mediante `php artisan migrate:fresh --seed` (solo en esta base de datos de prácticas).
+3. Realizar una captura del listado en el navegador y otra de la consulta `SELECT * FROM alumnos;` en MySQL.
+
+Entrega en Moodle Centros: dos capturas de pantalla y una breve explicación de qué hacen los comandos `composer install`, `php artisan key:generate`, `php artisan migrate` y `php artisan db:seed`.
+
+La práctica se considerará completada cuando la aplicación funcione utilizando la base de datos MySQL local, sin depender de una base de datos de otro equipo.
 
 ![1792506803008](image/README/1792506803008.png)
 
 ---
-
-
 
 # 2 CREACIÓN Proyecto Laravel 13: Listado de alumnos de 2.º DAW
 
@@ -269,11 +597,9 @@ SELECT * FROM alumnos;
 
 Deberían aparecer los 11 alumnos.
 
-
 ![1792506441684](image/README/1792506441684.png)
 
 ![1792506592013](image/README/1792506592013.png)
-
 
 ## 7. Crear el controlador
 
